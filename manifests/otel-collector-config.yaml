@@ -1,0 +1,31 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+processors:
+  k8sattributes:
+  filter:
+    logs:
+      include:
+        match_type: regexp
+        expressions:
+        - "Sample log message"
+  resource:
+    attributes:
+    - key: custom_attribute
+      value: "custom_value"
+      action: upsert
+  resourcedetection:
+    detectors: [system, gce, k8s]
+
+exporters:
+  logging:
+    loglevel: debug
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [k8sattributes, filter, resource, resourcedetection]
+      exporters: [logging]
